@@ -1,0 +1,72 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'Create EC2 instance and its security group.'
+Metadata:
+  Author: FilipKamenar
+
+Parameters: 
+  InstanceName:
+    Type: String
+    Description: Name of EC2 instance.
+  InstanceType:
+    Type: String
+    Description: Type of EC2 instance.
+  InstanceImageId:
+    Type: AWS::EC2::Image::Id
+  KeyName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Name of an existing EC2 KeyPair to enable access to the instance.
+  SgName:
+    Type: String
+  Vpc:
+    Type: AWS::EC2::VPC::Id
+  Subnet:
+    Type: AWS::EC2::Subnet::Id
+  RdsSecurityGroup:
+    Type: AWS::EC2::SecurityGroup::Id
+  IngressIpAddress:
+    Type: String
+
+Resources:
+  Ec2SecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: !Ref SgName
+      GroupDescription: EC2 pgAdmin instance SG
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref IngressIpAddress
+      SecurityGroupEgress:
+        - IpProtocol: '-1'
+          DestinationSecurityGroupId: !Ref RdsSecurityGroup
+
+  Ec2Instance:
+    Type: AWS::EC2::Instance
+    Properties: 
+      InstanceType: !Ref InstanceType
+      ImageId: !Ref InstanceImageId
+      KeyName: !Ref KeyName
+      NetworkInterfaces: 
+        - AssociatePublicIpAddress: true
+          DeviceIndex: "0"
+          GroupSet:
+           - !Ref Ec2SecurityGroup
+          SubnetId: !Ref Subnet
+      Tags: 
+        - Key: "Name"
+          Value: !Ref InstanceName
+      UserData:
+        Fn::Base64: 
+          !Sub |
+            #!/bin/bash
+            yum update -y
+            yum install pgadmin4-web -y
+Outputs:
+  Ec2InstanceId:
+    Description: ID of the pgAdmin Ec2 instance
+    Value: !Ref Ec2Instance
+  Ec2InstancePublicIp:
+    Description: Public IP of the pgAdmin Ec2 instance
+    Value: !GetAtt Ec2Instance.PublicIp
