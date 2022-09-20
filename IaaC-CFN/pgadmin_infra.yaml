@@ -7,19 +7,19 @@ Parameters:
   InstanceName:
     Type: String
     Description: Name of EC2 instance.
-    Default: legato-pgadmin4-web-server
+    Default: pgadmin4-web-server
   InstanceType:
     Type: String
     Description: Type of EC2 instance.
     Default: t3a.small
   InstanceImageId:
     Type: 'AWS::EC2::Image::Id'
-    Description: AMI ID of the Ubuntu image.
+    Description: AMI ID of the Ubuntu 22 x86 image.
     Default: 'ami-065deacbcaac64cf2'
   RdsSecurityGroup:
     Type: AWS::EC2::SecurityGroup::Id
     Description: Existing Security group ID of PostgreSQL RDS instance.
-    Default: 'sg-006fd74e2ab3f26f8'
+    Default: 'UPDATEME'
   IngressIpAddress:
     Type: String
     Description: CIDR of the IP address to allow access to the pgAdmin4 EC2 instance.
